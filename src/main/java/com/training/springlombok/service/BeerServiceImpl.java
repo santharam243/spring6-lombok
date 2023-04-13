@@ -18,7 +18,6 @@ public class BeerServiceImpl implements BeerService {
     public BeerServiceImpl() {
         BeerDTO beer1 = BeerDTO.builder()
                 .id(UUID.randomUUID())
-                .version(1)
                 .beerName("KFC")
                 .beerStyle(BeerStyle.LAGER)
                 .upc("123456")
@@ -29,7 +28,6 @@ public class BeerServiceImpl implements BeerService {
                 .build();
         BeerDTO beer2 = BeerDTO.builder()
                 .id(UUID.randomUUID())
-                .version(1)
                 .beerName("Dominos")
                 .beerStyle(BeerStyle.ALE)
                 .upc("0987")
@@ -40,7 +38,6 @@ public class BeerServiceImpl implements BeerService {
                 .build();
         BeerDTO beer3 = BeerDTO.builder()
                 .id(UUID.randomUUID())
-                .version(1)
                 .beerName("Sangeethas")
                 .beerStyle(BeerStyle.PALE_ALE)
                 .upc("675")
@@ -62,9 +59,9 @@ public class BeerServiceImpl implements BeerService {
     }
 
     @Override
-    public BeerDTO getBeerById(UUID id) {
+    public Optional<BeerDTO> getBeerById(UUID id) {
         log.info("In BeerServiceImpl: getBeerById");
-        return beerMap.get(id);
+        return Optional.ofNullable(beerMap.get(id));
     }
 
     @Override
@@ -85,7 +82,7 @@ public class BeerServiceImpl implements BeerService {
     }
 
     @Override
-    public void updateBeer(UUID beerId, BeerDTO beer) {
+    public Optional<BeerDTO> updateBeer(UUID beerId, BeerDTO beer) {
         BeerDTO existing = beerMap.get(beerId);
         existing.setBeerName(beer.getBeerName());
         existing.setBeerStyle(beer.getBeerStyle());
@@ -94,11 +91,13 @@ public class BeerServiceImpl implements BeerService {
         existing.setQuantityInHand(beer.getQuantityInHand());
 
         beerMap.put(existing.getId(), existing);
+        return Optional.of(existing);
     }
 
     @Override
-    public void deleteByID(UUID beerId) {
+    public Boolean deleteByID(UUID beerId) {
         beerMap.remove(beerId);
+        return true;
     }
 
     @Override

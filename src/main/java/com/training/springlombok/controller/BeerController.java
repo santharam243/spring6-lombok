@@ -1,15 +1,18 @@
 package com.training.springlombok.controller;
 
+import com.training.springlombok.exception.NotFoundException;
 import com.training.springlombok.model.BeerDTO;
 import com.training.springlombok.service.BeerService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -26,9 +29,9 @@ public class BeerController {
     }
 
     @RequestMapping(value = "/{beerId}", method = RequestMethod.GET)
-    public BeerDTO getBeerByID(@PathVariable("beerId") UUID beerId) {
+    public Optional<BeerDTO> getBeerByID(@PathVariable("beerId") UUID beerId) {
         log.info("In BeerContoller");
-        return beerService.getBeerById(beerId);
+        return Optional.ofNullable(beerService.getBeerById(beerId).orElseThrow(NotFoundException::new));
     }
 
     @PostMapping
@@ -41,13 +44,17 @@ public class BeerController {
 
     @PutMapping("/{beerId}")
     public ResponseEntity updateBeer(@PathVariable("beerId") UUID beerId, @RequestBody BeerDTO beer){
-        beerService.updateBeer(beerId,  beer);
+        if(beerService.updateBeer(beerId,  beer).isEmpty()) {
+            throw new NotFoundException();
+        }
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
 
     @DeleteMapping("/{beerId}")
     public ResponseEntity deleteByID(@PathVariable("beerId") UUID beerId){
-        beerService.deleteByID(beerId);
+        if(!beerService.deleteByID(beerId)) {
+            throw new NotFoundException();
+        };
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
 
